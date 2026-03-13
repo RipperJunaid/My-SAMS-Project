@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SmartFace Attendance v2.0 - Professional</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --sidebar-width: 260px;
+      --topbar-height: 60px;
+      --primary-color: #3b82f6;
+      --dark-bg: #1a1a1a;
+      --darker-bg: #0f0f0f;
+      --card-bg: #2a2a2a;
+      --border-color: #404040;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0a0;
+      --hover-bg: #353535;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--darker-bg);
+      color: var(--text-primary);
+      overflow-x: hidden;
+    }
+
+    /* ===== LOGIN PAGE ===== */
+    .login-wrapper {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      padding: 40px;
+      max-width: 450px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .login-header { text-align: center; margin-bottom: 32px; }
+    .login-header i { font-size: 48px; color: var(--primary-color); margin-bottom: 16px; }
+    .login-header h2 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .login-header p { color: var(--text-secondary); font-size: 14px; }
+
+    .form-control {
+      background: var(--darker-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 12px 16px;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+
+    .form-control:focus {
+      background: var(--darker-bg);
+      border-color: var(--primary-color);
+      color: var(--text-primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .input-group-text {
+      background: var(--darker-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-success { background: #10b981; border: none; padding: 12px; border-radius: 8px; font-weight: 600; }
+    .btn-success:hover { background: #059669; }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--dark-bg);
+      border-right: 1px solid var(--border-color);
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-header i { font-size: 24px; color: var(--primary-color); }
+    .sidebar-header h3 { font-size: 20px; font-weight: 700; margin: 0; }
+
+    .sidebar-menu { padding: 20px 0; }
+
+    .menu-item {
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+    }
+
+    .menu-item:hover {
+      background: var(--hover-bg);
+      color: var(--text-primary);
+      border-left-color: var(--primary-color);
+    }
+
+    .menu-item.active {
+      background: var(--hover-bg);
+      color: var(--primary-color);
+      border-left-color: var(--primary-color);
+    }
+
+    .menu-item i { width: 20px; text-align: center; }
+
+    /* ===== TOPBAR ===== */
+    .topbar {
+      position: fixed;
+      left: var(--sidebar-width);
+      top: 0;
+      right: 0;
+      height: var(--topbar-height);
+      background: var(--dark-bg);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+      z-index: 999;
+    }
+
+    .topbar-title { font-size: 20px; font-weight: 600; }
+    .topbar-actions { display: flex; align-items: center; gap: 20px; }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+      background: var(--card-bg);
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .user-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      min-width: 200px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      display: none;
+    }
+
+    .user-menu.show { display: block; }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      margin-top: var(--topbar-height);
+      padding: 30px;
+      min-height: calc(100vh - var(--topbar-height));
+    }
+
+    .page-header { margin-bottom: 30px; }
+    .page-header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+    .page-header p { color: var(--text-secondary); }
+
+    /* ===== CARDS ===== */
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.3s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+
+    .stat-icon.blue { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+    .stat-icon.green { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+    .stat-icon.yellow { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .stat-icon.red { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+
+    .stat-value { font-size: 32px; font-weight: 700; margin-bottom: 4px; }
+    .stat-label { color: var(--text-secondary); font-size: 14px; }
+
+    .content-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    /* ===== TABLE ===== */
+    .table { color: var(--text-primary); margin-bottom: 0; }
+
+    .table thead th {
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      padding: 12px;
+    }
+
+    .table tbody td {
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 12px;
+    }
+
+    .table tbody tr:last-child td { border-bottom: none; }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .btn-outline-light { border-color: var(--border-color); color: var(--text-primary); }
+    .btn-outline-light:hover {
+      background: var(--hover-bg);
+      border-color: var(--primary-color);
+      color: var(--text-primary);
+    }
+
+    /* ===== VIDEO ===== */
+    video {
+      border-radius: 12px;
+      border: 2px solid var(--border-color);
+      max-width: 100%;
+      transform: scaleX(-1);
+    }
+
+    /* ===== ALERTS ===== */
+    .alert { border-radius: 8px; border: none; }
+    .alert-success { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .alert-danger { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .alert-info { background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
+
+    /* ===== SIGNATURE ===== */
+    .signature {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      z-index: 1001;
+    }
+
+    .signature strong { color: var(--primary-color); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .sidebar { left: -var(--sidebar-width); }
+      .topbar, .main-content { margin-left: 0; left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== LOGIN PAGE ========== -->
+  <div id="auth-page" class="login-wrapper">
+    <div class="login-card">
+      <div class="login-header">
+        <i class="fas fa-user-shield"></i>
+        <h2>SmartFace v2.0</h2>
+        <p>Professional Attendance Management System</p>
+      </div>
+
+      <!-- Login Section -->
+      <div id="login-section">
+        <form id="login-form">
+          <div class="mb-3">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-user"></i></span>
+              <input type="text" id="login-username" class="form-control" placeholder="Username" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-lock"></i></span>
+              <input type="password" id="login-password" class="form-control" placeholder="Password" required>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 mb-3">
+            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+          </button>
+        </form>
+        <div class="text-center">
+          <a href="#" onclick="showSection('register'); return false;" class="text-primary text-decoration-none">Create Account</a>
+          <span class="text-secondary mx-2">|</span>
+          <a href="#" onclick="showSection('forgot'); return false;" class="text-secondary text-decoration-none">Forgot Password?</a>
+        </div>
+        <div id="login-message" class="mt-3"></div>
+      </div>
+
+      <!-- Register Section -->
+      <div id="register-section" style="display:none;">
+        <h4 class="text-center mb-4">Create New Account</h4>
+        <form id="register-form">
+          <div class="mb-3">
+            <input type="text" id="reg-username" class="form-control" placeholder="Username" required>
+          </div>
+          <div class="mb-3">
+            <input type="email" id="reg-email" class="form-control" placeholder="Email Address" required>
+          </div>
+          <div class="mb-3">
+            <input type="password" id="reg-password" class="form-control" placeholder="Password" required>
+          </div>
+          <div class="mb-3">
+            <select id="reg-role" class="form-control">
+              <option value="student">Student</option>
+              <option value="teacher">Teacher</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-success w-100 mb-3">
+            <i class="fas fa-user-plus me-2"></i>Create Account
+          </button>
+        </form>
+        <div class="text-center">
+          <a href="#" onclick="showSection('login'); return false;" class="text-primary text-decoration-none">Back to Login</a>
+        </div>
+        <div id="register-message" class="mt-3"></div>
+      </div>
+
+      <!-- Forgot Password Section -->
+      <div id="forgot-section" style="display:none;">
+        <h4 class="text-center mb-4">Reset Password</h4>
+        <form id="forgot-form">
+          <div class="mb-3">
+            <input type="email" id="forgot-email" class="form-control" placeholder="Enter your email" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 mb-3">
+            <i class="fas fa-paper-plane me-2"></i>Send Reset Link
+          </button>
+        </form>
+        <div class="text-center">
+          <a href="#" onclick="showSection('login'); return false;" class="text-primary text-decoration-none">Back to Login</a>
+        </div>
+        <div id="forgot-message" class="mt-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MAIN APPLICATION ========== -->
+  <div id="main-app" style="display:none;">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <i class="fas fa-user-shield"></i>
+        <h3>SmartFace</h3>
+      </div>
+      <div class="sidebar-menu">
+        <a class="menu-item active" onclick="switchSection('dashboard')">
+          <i class="fas fa-chart-line"></i>
+          <span>Dashboard</span>
+        </a>
+        <a class="menu-item" onclick="switchSection('register-student')">
+          <i class="fas fa-user-plus"></i>
+          <span>Register Student</span>
+        </a>
+        <a class="menu-item" onclick="switchSection('attendance')">
+          <i class="fas fa-camera"></i>
+          <span>Mark Attendance</span>
+        </a>
+        <a class="menu-item" onclick="switchSection('records')">
+          <i class="fas fa-clipboard-list"></i>
+          <span>Attendance Records</span>
+        </a>
+        <a class="menu-item" id="admin-menu" onclick="switchSection('admin')" style="display:none;">
+          <i class="fas fa-user-shield"></i>
+          <span>Admin Panel</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-actions">
+        <div class="user-profile" onclick="toggleUserMenu()">
+          <div class="user-avatar" id="user-avatar">B</div>
+          <div>
+            <div id="user-name" style="font-weight:600; font-size:14px;">Basim</div>
+            <div id="user-role" style="font-size:12px; color:var(--text-secondary);">Admin</div>
+          </div>
+          <i class="fas fa-chevron-down" style="font-size:12px; color:var(--text-secondary);"></i>
+          <div class="user-menu" id="user-menu">
+            <div class="p-3 border-bottom" style="border-color:var(--border-color)!important;">
+              <div class="fw-bold" id="menu-username">Basim</div>
+              <div class="text-secondary small" id="menu-role">Administrator</div>
+            </div>
+            <button class="btn btn-sm w-100 text-danger" onclick="logout()" style="border:none; padding:12px;">
+              <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Dashboard Section -->
+      <section id="dashboard">
+        <div class="page-header">
+          <h1>Dashboard</h1>
+          <p>Overview of attendance statistics</p>
+        </div>
+        <div class="row g-4 mb-4">
+          <div class="col-md-3">
+            <div class="stat-card">
+              <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+              <div class="stat-value" id="total-students">0</div>
+              <div class="stat-label">Total Students</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-card">
+              <div class="stat-icon green"><i class="fas fa-calendar-check"></i></div>
+              <div class="stat-value" id="today-att">0</div>
+              <div class="stat-label">Today's Attendance</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-card">
+              <div class="stat-icon yellow"><i class="fas fa-calendar-week"></i></div>
+              <div class="stat-value" id="week-att">0</div>
+              <div class="stat-label">This Week</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-card">
+              <div class="stat-icon red"><i class="fas fa-percentage"></i></div>
+              <div class="stat-value" id="att-rate">0%</div>
+              <div class="stat-label">Attendance Rate</div>
+            </div>
+          </div>
+        </div>
+        <div class="content-card">
+          <h4 class="mb-4">Recent Attendance</h4>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>ID</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody id="recent-list"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Register Student Section -->
+      <section id="register-student" class="d-none">
+        <div class="page-header">
+          <h1>Register Student</h1>
+          <p>Add new student with face recognition</p>
+        </div>
+        <div class="content-card" style="max-width:600px;">
+          <form id="student-form">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Student ID</label>
+                <input type="text" id="stu-id" class="form-control" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Full Name</label>
+                <input type="text" id="stu-name" class="form-control" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Face Photo</label>
+              <input type="file" id="stu-photo" accept="image/*" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-user-plus me-2"></i>Register Student
+            </button>
+          </form>
+          <div id="student-message" class="mt-3"></div>
+        </div>
+      </section>
+
+      <!-- Mark Attendance Section -->
+      <section id="attendance" class="d-none">
+        <div class="page-header">
+          <h1>Mark Attendance</h1>
+          <p>Use camera to recognize and mark attendance</p>
+        </div>
+        <div class="content-card text-center">
+          <video id="video" width="640" height="480" autoplay muted></video>
+          <div class="mt-4 d-flex gap-3 justify-content-center flex-wrap">
+            <button class="btn btn-success" onclick="startCamera()">
+              <i class="fas fa-video me-2"></i>Start Camera
+            </button>
+            <button class="btn btn-primary" onclick="captureAndRecognize()">
+              <i class="fas fa-camera me-2"></i>Capture & Recognize
+            </button>
+            <button class="btn btn-danger" onclick="stopCamera()">
+              <i class="fas fa-stop me-2"></i>Stop Camera
+            </button>
+          </div>
+          <div id="attendance-message" class="mt-4"></div>
+        </div>
+      </section>
+
+      <!-- Records Section -->
+      <section id="records" class="d-none">
+        <div class="page-header">
+          <h1>Attendance Records</h1>
+          <p>View and filter attendance history</p>
+        </div>
+        <div class="content-card">
+          <div class="d-flex gap-2 mb-4 flex-wrap">
+            <input type="date" id="filter-date" class="form-control" style="max-width:200px;">
+            <input type="text" id="filter-student" class="form-control" placeholder="Student ID" style="max-width:200px;">
+            <button class="btn btn-primary" onclick="loadRecords()">
+              <i class="fas fa-filter me-2"></i>Filter
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Student ID</th>
+                  <th>Name</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody id="records-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Admin Section -->
+      <section id="admin" class="d-none">
+        <div class="page-header">
+          <h1>Admin Panel</h1>
+          <p>System overview and management</p>
+        </div>
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="stat-card">
+              <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+              <div class="stat-value" id="admin-students">0</div>
+              <div class="stat-label">Total Students</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="stat-card">
+              <div class="stat-icon green"><i class="fas fa-clipboard-check"></i></div>
+              <div class="stat-value" id="admin-attendance">0</div>
+              <div class="stat-label">Total Attendance Records</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="stat-card">
+              <div class="stat-icon yellow"><i class="fas fa-user-shield"></i></div>
+              <div class="stat-value" id="admin-users">0</div>
+              <div class="stat-label">System Users</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Signature -->
+  <div class="signature">
+    Designed by <strong>Muhammad Basim</strong>, Automation Engineer DSBA
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    const API_URL = "http://localhost:8000";
+    let authToken = localStorage.getItem('access_token');
+    let currentUser = JSON.parse(localStorage.getItem('user_data') || '{}');
+    let stream;
+
+    // Check login state
+    if (authToken && currentUser.username) {
+      showMainApp();
+    } else {
+      showAuthPage();
+    }
+
+    function showAuthPage() {
+      document.getElementById('auth-page').style.display = 'flex';
+      document.getElementById('main-app').style.display = 'none';
+    }
+
+    function showMainApp() {
+      document.getElementById('auth-page').style.display = 'none';
+      document.getElementById('main-app').style.display = 'block';
+      setupUserInterface();
+      switchSection('dashboard');
+    }
+
+    function setupUserInterface() {
+      document.getElementById('user-name').textContent = currentUser.username;
+      document.getElementById('user-role').textContent = currentUser.role;
+      document.getElementById('user-avatar').textContent = currentUser.username.charAt(0).toUpperCase();
+      document.getElementById('menu-username').textContent = currentUser.username;
+      document.getElementById('menu-role').textContent = currentUser.role;
+      
+      if (currentUser.role === 'admin') {
+        document.getElementById('admin-menu').style.display = 'flex';
+      }
+    }
+
+    function showSection(section) {
+      document.querySelectorAll('[id$="-section"]').forEach(el => el.style.display = 'none');
+      document.getElementById(section + '-section').style.display = 'block';
+    }
+
+    function switchSection(section) {
+      // Update menu active state
+      document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+      event?.target?.closest('.menu-item')?.classList.add('active');
+      
+      // Show section
+      document.querySelectorAll('.main-content section').forEach(el => el.classList.add('d-none'));
+      document.getElementById(section).classList.remove('d-none');
+      
+      // Update title
+      const titles = {
+        'dashboard': 'Dashboard',
+        'register-student': 'Register Student',
+        'attendance': 'Mark Attendance',
+        'records': 'Attendance Records',
+        'admin': 'Admin Panel'
+      };
+      document.getElementById('page-title').textContent = titles[section];
+      
+      // Load data if needed
+      if (section === 'dashboard') loadStats();
+      if (section === 'records') loadRecords();
+      if (section === 'admin') loadAdminStats();
+    }
+
+    function toggleUserMenu() {
+      document.getElementById('user-menu').classList.toggle('show');
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.user-profile')) {
+        document.getElementById('user-menu').classList.remove('show');
+      }
+    });
+
+    function showMessage(elementId, message, type) {
+      const element = document.getElementById(elementId);
+      element.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+      setTimeout(() => { element.innerHTML = ''; }, 5000);
+    }
+
+    // ===== AUTHENTICATION =====
+    
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      if (!username || !password) {
+        showMessage('login-message', 'Please enter both fields', 'danger');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('username', username);
+      formData.append('password', password);
+
+      try {
+        const response = await fetch(`${API_URL}/api/login`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+        
+        if (response.ok && data.access_token) {
+          authToken = data.access_token;
+          currentUser = { username: data.username, role: data.role };
+          localStorage.setItem('access_token', authToken);
+          localStorage.setItem('user_data', JSON.stringify(currentUser));
+          showMessage('login-message', `Welcome ${data.username}!`, 'success');
+          setTimeout(() => showMainApp(), 800);
+        } else {
+          showMessage('login-message', data.detail || 'Invalid credentials', 'danger');
+        }
+      } catch (error) {
+        showMessage('login-message', 'Connection error', 'danger');
+      }
+    });
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData();
+      formData.append('username', document.getElementById('reg-username').value.trim());
+      formData.append('email', document.getElementById('reg-email').value.trim());
+      formData.append('password', document.getElementById('reg-password').value);
+      formData.append('role', document.getElementById('reg-role').value);
+
+      try {
+        const response = await fetch(`${API_URL}/api/users/create`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          showMessage('register-message', data.message, 'success');
+          document.getElementById('register-form').reset();
+          setTimeout(() => showSection('login'), 2000);
+        } else {
+          showMessage('register-message', data.detail || 'Registration failed', 'danger');
+        }
+      } catch (error) {
+        showMessage('register-message', 'Connection error', 'danger');
+      }
+    });
+
+    document.getElementById('forgot-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      showMessage('forgot-message', 'Contact administrator for password reset', 'info');
+    });
+
+    function logout() {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user_data');
+      authToken = null;
+      currentUser = {};
+      showAuthPage();
+    }
+
+    // ===== API HELPER =====
+    
+    async function apiRequest(url, options = {}) {
+      try {
+        const response = await fetch(`${API_URL}${url}`, {
+          headers: { 'Authorization': `Bearer ${authToken}`, ...options.headers },
+          ...options
+        });
+        if (response.status === 401) { logout(); return null; }
+        return await response.json();
+      } catch (error) {
+        console.error('API Error:', error);
+        return null;
+      }
+    }
+
+    // ===== DASHBOARD =====
+    
+    async function loadStats() {
+      const data = await apiRequest('/api/stats');
+      if (!data?.success) return;
+      
+      const s = data.stats;
+      document.getElementById('total-students').textContent = s.total_students;
+      document.getElementById('today-att').textContent = s.today_attendance;
+      document.getElementById('week-att').textContent = s.week_attendance;
+      document.getElementById('att-rate').textContent = s.attendance_rate + '%';
+      
+      const recentHTML = s.recent_attendance.map(r => `
+        <tr>
+          <td><strong>${r.name}</strong><br><small class="text-secondary">${r.student_id}</small></td>
+          <td>${r.student_id}</td>
+          <td>${new Date(r.marked_at).toLocaleTimeString()}</td>
+        </tr>
+      `).join('');
+      
+      document.getElementById('recent-list').innerHTML = recentHTML || 
+        '<tr><td colspan="3" class="text-center text-secondary">No recent attendance</td></tr>';
+    }
+
+    // ===== STUDENT REGISTRATION =====
+    
+    document.getElementById('student-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData();
+      formData.append('student_id', document.getElementById('stu-id').value);
+      formData.append('name', document.getElementById('stu-name').value);
+      formData.append('file', document.getElementById('stu-photo').files[0]);
+
+      try {
+        const response = await fetch(`${API_URL}/api/register`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${authToken}` },
+          body: formData
+        });
+
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          showMessage('student-message', data.message, 'success');
+          document.getElementById('student-form').reset();
+        } else {
+          showMessage('student-message', data.detail || 'Registration failed', 'danger');
+        }
+      } catch (error) {
+        showMessage('student-message', 'Error: ' + error.message, 'danger');
+      }
+    });
+
+    // ===== CAMERA =====
+    
+    async function startCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        document.getElementById('video').srcObject = stream;
+      } catch (error) {
+        alert('Camera access denied');
+      }
+    }
+
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        document.getElementById('video').srcObject = null;
+      }
+    }
+
+    async function captureAndRecognize() {
+      const video = document.getElementById('video');
+      if (!video.srcObject) { alert('Start camera first'); return; }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0);
+
+      canvas.toBlob(async (blob) => {
+        const formData = new FormData();
+        formData.append('file', blob, 'capture.jpg');
+
+        document.getElementById('attendance-message').innerHTML = 
+          '<div class="spinner-border text-primary"></div><p class="mt-2">Recognizing...</p>';
+
+        try {
+          const response = await fetch(`${API_URL}/api/recognize`, {
+            method: 'POST',
+            body: formData
+          });
+
+          const data = await response.json();
+          
+          if (response.ok && data.success && data.recognized) {
+            document.getElementById('attendance-message').innerHTML = `
+              <div class="alert alert-success">
+                <h5>✅ ${data.message}</h5>
+                <p class="mb-1"><strong>Student:</strong> ${data.name}</p>
+                <p class="mb-1"><strong>ID:</strong> ${data.student_id}</p>
+                <p class="mb-0"><strong>Confidence:</strong> ${data.confidence}%</p>
+              </div>`;
+          } else {
+            document.getElementById('attendance-message').innerHTML = `
+              <div class="alert alert-danger">❌ Face not recognized</div>`;
+          }
+        } catch (error) {
+          document.getElementById('attendance-message').innerHTML = `
+            <div class="alert alert-danger">Error: ${error.message}</div>`;
+        }
+      }, 'image/jpeg');
+    }
+
+    // ===== RECORDS =====
+    
+    async function loadRecords() {
+      const date = document.getElementById('filter-date').value;
+      const studentId = document.getElementById('filter-student').value;
+      let url = '/api/attendance';
+      const params = new URLSearchParams();
+      if (date) params.append('date', date);
+      if (studentId) params.append('student_id', studentId);
+      if (params.toString()) url += '?' + params.toString();
+
+      const data = await apiRequest(url);
+      if (!data?.success) return;
+      
+      const rows = data.records.map(r => `
+        <tr>
+          <td>${r.id}</td>
+          <td>${r.student_id}</td>
+          <td>${r.name}</td>
+          <td>${r.date}</td>
+          <td>${new Date(r.marked_at).toLocaleTimeString()}</td>
+        </tr>
+      `).join('');
+
+      document.getElementById('records-table').innerHTML = rows || 
+        '<tr><td colspan="5" class="text-center text-secondary">No records found</td></tr>';
+    }
+
+    // ===== ADMIN =====
+    
+    async function loadAdminStats() {
+      const data = await apiRequest('/api/stats');
+      if (!data?.success) return;
+      
+      const s = data.stats;
+      document.getElementById('admin-students').textContent = s.total_students;
+      document.getElementById('admin-attendance').textContent = s.total_attendance_records;
+      document.getElementById('admin-users').textContent = '3'; // Placeholder
+    }
+  </script>
+</body>
+</html>
+    
